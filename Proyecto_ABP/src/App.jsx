@@ -6,7 +6,6 @@ function App() {
     const [search, setSearch] = useState("");
     const [showStats, setShowStats] = useState(true);
 
-    const containerRef = useRef(null);
 
     useEffect(() => {
         axios.get("https://dummyjson.com/products?limit=100").then((res) => {
@@ -23,7 +22,7 @@ function App() {
     const min = filteredProducts.length ? Math.min(...filteredProducts.map(p => p.price)) : 0;
 
     return (
-        <div ref={containerRef}>
+        <div>
             <h1>Lista de Productos</h1>
 
             <input
