@@ -18,8 +18,8 @@ function App() {
     );
 
     const total = filteredProducts.length;
-    const max = filteredProducts.length ? Math.max(...filteredProducts.map(p => p.price)) : 0;
-    const min = filteredProducts.length ? Math.min(...filteredProducts.map(p => p.price)) : 0;
+    const max = Math.max(...filteredProducts.map(p => p.price));
+    const min = Math.min(...filteredProducts.map(p => p.price));
 
     return (
         <div>
@@ -38,7 +38,7 @@ function App() {
 
             {showStats && filteredProducts.length > 0 && (
                 <div>
-                    <p>Total: {total}</p>
+                    <p>Productos Totales: {total}</p>
                     <p>Precio Máximo: {max}</p>
                     <p>Precio Mínimo: {min}</p>
                 </div>
