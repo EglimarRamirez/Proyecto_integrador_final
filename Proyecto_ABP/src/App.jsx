@@ -9,6 +9,10 @@ function App() {
     const [search, setSearch] = useState("");
     const [showStats, setShowStats] = useState(true);
     const [darkMode, setDarkMode] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [category, setCategory] = useState("all");
+    const [sortBy, setSortBy] = useState("");
+    const [sortOrder, setSortOrder] = useState("asc");
 
     const containerRef = useRef(null);
 
@@ -17,11 +21,29 @@ function App() {
         axios.get("https://dummyjson.com/products?limit=100").then((res) => {
             setProducts(res.data.products);
         });
+        axios.get("https://dummyjson.com/products/categories").then((res) => {
+            setCategories(res.data);
+            console.log("Fetched Categories:", res.data);
+        });
     }, []);
 
-    const filteredProducts = products.filter((p) =>
-        p.title.toLowerCase().includes(search.toLowerCase())
-    );
+    let filteredProducts = products;
+
+    filteredProducts = products.filter((p) =>
+            p.title.toLowerCase().includes(search.toLowerCase())
+        );
+
+    if (category !== "all") {
+      filteredProducts = filteredProducts.filter(
+        (p) => p.category === category
+      );
+    }
+    
+    if (sortBy === "price" || sortBy === "rating") {
+      filteredProducts = [...filteredProducts].sort((a, b) =>
+        sortOrder === "asc" ? a[sortBy] - b[sortBy] : b[sortBy] - a[sortBy]
+      );
+    }
 
     const total = filteredProducts.length;
     const max = Math.max(...filteredProducts.map(p => p.price));
@@ -47,9 +69,44 @@ function App() {
             
             </div> 
             
-            <SearchBar search={search} setSearch={setSearch} />            
-            
+            <SearchBar search={search} setSearch={setSearch} /> 
 
+            {/* Controles de filtro y orden */}
+            <div className="flex flex-wrap gap-4 my-4">
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="border p-2 rounded"
+              >
+                <option value="all">Todas las categorías</option>
+                {categories.map((cat) => (
+                  <option key={cat.slug} value={cat.slug}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="border p-2 rounded"
+              >
+                <option value="">Ordenar por...</option>
+                <option value="price">Precio</option>
+                <option value="rating">Rating</option>
+              </select>
+
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="border p-2 rounded"
+              >
+                <option value="asc">Ascendente</option>
+                <option value="desc">Descendente</option>
+              </select>
+            </div>
+         
+            
             <ProductList products={filteredProducts} />
 
             <div className="mt-6">
