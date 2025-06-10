@@ -13,19 +13,21 @@ function App() {
     const [category, setCategory] = useState("all");
     const [sortBy, setSortBy] = useState("");
     const [sortOrder, setSortOrder] = useState("asc");
+    const [page, setPage] = useState(1);
 
     const containerRef = useRef(null);
 
+    const limit = 30;
 
     useEffect(() => {
-        axios.get("https://dummyjson.com/products?limit=100").then((res) => {
+        axios.get(`https://dummyjson.com/products?limit=${limit}&skip=${(page - 1) * limit}`).then((res) => {
             setProducts(res.data.products);
         });
-        axios.get("https://dummyjson.com/products/categories").then((res) => {
-            setCategories(res.data);
-            console.log("Fetched Categories:", res.data);
-        });
-    }, []);
+        
+        axios.get(`https://dummyjson.com/products/categories`).then((res) => {
+            setCategories(res.data);    
+        });        
+    }, [page]);
 
     let filteredProducts = products;
 
@@ -108,6 +110,25 @@ function App() {
          
             
             <ProductList products={filteredProducts} />
+
+            <small>Estamos en la página {page}</small>
+            <br />
+            <button
+                disabled={page === 1}
+                onClick={() => {
+                    setPage(page - 1);
+                }}
+            >
+                Página anterior
+            </button>
+            <button
+                disabled={filteredProducts.length < 30}
+                onClick={() => {
+                    setPage(page + 1);
+                }}
+            >
+                Página siguiente
+            </button> 
 
             <div className="mt-6">
 
