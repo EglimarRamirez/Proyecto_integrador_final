@@ -46,8 +46,8 @@ function App() {
     }
 
     const total = filteredProducts.length;
-    const max = Math.max(...filteredProducts.map(p => p.price));
-    const min = Math.min(...filteredProducts.map(p => p.price));
+    const max = filteredProducts.length > 0 ? Math.max(...filteredProducts.map(p => p.price)) : 0;
+    const min = filteredProducts.length > 0 ? Math.min(...filteredProducts.map(p => p.price)) : 0;
 
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
