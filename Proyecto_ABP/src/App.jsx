@@ -35,19 +35,27 @@ function App() {
     return (
         <div ref={containerRef}
         >
-            <h1>Lista de Productos</h1>
+            <div className="flex justify-between items-center mb-6">         
+              <h1 className="text-2xl font-bold">Lista de Productos</h1>
             
-            <button onClick={toggleDarkMode}>Modo {darkMode ? "Claro" : "Oscuro"}</button>
+              <button
+                onClick={toggleDarkMode}
+                className="px-4 py-2 rounded bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-200 dark:text-black"
+              >
+                Modo {darkMode ? "Claro" : "Oscuro"}
+              </button>
             
-
+            </div> 
+            
             <SearchBar search={search} setSearch={setSearch} />            
             
 
             <ProductList products={filteredProducts} />
 
+            <div className="mt-6">
 
             <button onClick={() => setShowStats(!showStats)}
-
+                    className="mb-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500"
             >
                 {showStats ? "Ocultar" : "Mostrar"} estadísticas
             </button>
@@ -58,8 +66,12 @@ function App() {
             )}
 
             {filteredProducts.length === 0 && (
-              <p>No se encontraron productos</p>
+              <p className="text-center text-red-500 font-semibold">
+                No se encontraron productos
+              </p>
             )}
+
+            </div>
         </div>
     );
 }
