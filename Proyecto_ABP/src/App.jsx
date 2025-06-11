@@ -14,6 +14,7 @@ function App() {
     const [sortBy, setSortBy] = useState("");
     const [sortOrder, setSortOrder] = useState("asc");
     const [page, setPage] = useState(1);
+    const [totalProductsApi, setTotalProductsApi] = useState(0);
 
     const containerRef = useRef(null);
 
@@ -22,6 +23,7 @@ function App() {
     useEffect(() => {
         axios.get(`https://dummyjson.com/products?limit=${limit}&skip=${(page - 1) * limit}`).then((res) => {
             setProducts(res.data.products);
+            setTotalProductsApi(res.data.total);
         });
         
         axios.get(`https://dummyjson.com/products/categories`).then((res) => {
@@ -111,7 +113,7 @@ function App() {
             
             <ProductList products={filteredProducts} />
 
-            <small>Estamos en la página {page}</small>
+            <small>Página {page}</small>
             <br />
             <button
                 disabled={page === 1}
@@ -122,7 +124,7 @@ function App() {
                 Página anterior
             </button>
             <button
-                disabled={filteredProducts.length < 30}
+                disabled={(page * limit) >= totalProductsApi}
                 onClick={() => {
                     setPage(page + 1);
                 }}
