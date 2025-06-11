@@ -52,6 +52,34 @@ function App() {
     const total = filteredProducts.length;
     const max = filteredProducts.length > 0 ? Math.max(...filteredProducts.map(p => p.price)) : 0;
     const min = filteredProducts.length > 0 ? Math.min(...filteredProducts.map(p => p.price)) : 0;
+    const averagePrice = filteredProducts.length > 0 ? (filteredProducts.reduce((sum, p) => sum + p.price, 0) / filteredProducts.length).toFixed(2) : 0;
+
+    const productsByCategory = filteredProducts.reduce((acc, product) => {
+        acc[product.category] = (acc[product.category] || 0) + 1;
+        return acc;
+    }, {});
+
+    const stockOver50 = filteredProducts.filter(p => p.stock > 50).length;
+
+    const ratingOver4_5 = filteredProducts.filter(p => p.rating > 4.5).length;
+
+    const averageRating = filteredProducts.length > 0 ? (filteredProducts.reduce((sum, p) => sum + p.rating, 0) / filteredProducts.length).toFixed(2) : 0;
+
+    const categoryStats = {};
+    Object.keys(productsByCategory).forEach(cat => {
+        const productsInCat = filteredProducts.filter(p => p.category === cat);
+        const pricesInCat = productsInCat.map(p => p.price);
+        const ratingsInCat = productsInCat.map(p => p.rating);
+
+        categoryStats[cat] = {
+            averagePrice: (pricesInCat.reduce((sum, price) => sum + price, 0) / pricesInCat.length).toFixed(2),
+            maxPrice: Math.max(...pricesInCat),
+            minPrice: Math.min(...pricesInCat),
+            averageRating: (ratingsInCat.reduce((sum, rating) => sum + rating, 0) / ratingsInCat.length).toFixed(2),
+            mostExpensiveProduct: productsInCat.reduce((prev, current) => (prev.price > current.price) ? prev : current, {price: 0}),
+            cheapestProduct: productsInCat.reduce((prev, current) => (prev.price < current.price) ? prev : current, {price: Infinity}),
+        };
+    });
 
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
@@ -142,7 +170,17 @@ function App() {
 
 
             {showStats && filteredProducts.length > 0 && (
-                <StatsPanel total={total}  max={max}  min={min} />
+                <StatsPanel 
+                total={total}
+                    max={max}          
+                    min={min}          
+                    averagePrice={averagePrice}
+                    productsByCategory={productsByCategory}
+                    stockOver50={stockOver50}
+                    ratingOver4_5={ratingOver4_5}
+                    averageRating={averageRating}
+                    categoryStats={categoryStats} 
+                />
             )}
 
             {filteredProducts.length === 0 && (
