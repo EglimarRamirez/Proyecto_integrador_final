@@ -180,6 +180,7 @@ function App() {
                     ratingOver4_5={ratingOver4_5}
                     averageRating={averageRating}
                     categoryStats={categoryStats} 
+                    filteredProducts={filteredProducts}
                 />
             )}
 
