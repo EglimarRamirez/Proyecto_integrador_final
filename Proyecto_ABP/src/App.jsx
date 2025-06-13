@@ -28,7 +28,7 @@ function App() {
     const limit = 30;
 
     // =========================================================================
-    //                EFECTOS SECUNDARIOS Y CARGA DE DATOS
+    //                            CARGA DE DATOS
     // =========================================================================
 
     // Cargar productos y categorías de la API cuando cambia la página
