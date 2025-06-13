@@ -15,7 +15,8 @@ function App() {
     const [sortOrder, setSortOrder] = useState("asc");
     const [page, setPage] = useState(1);
     const [totalProductsApi, setTotalProductsApi] = useState(0);
-
+    const [format, setFormat] = useState("");    
+    
     const containerRef = useRef(null);
 
     const limit = 30;
@@ -86,6 +87,82 @@ function App() {
         containerRef.current.classList.toggle("dark-mode");
     };
 
+    // Convertir datos a CSV
+    const convertToCsv = (data) => {
+      if (!data || data.length === 0) return "";
+
+      const headers = [
+        "id",
+        "title",
+        "price",
+        "category",
+        "description",
+        "rating",
+        "stock",
+      ];
+
+      const csvRows = [headers.join(",")];
+
+      for (const row of data) {
+        const values = headers.map((header) => {
+          const val = row[header];
+          if (typeof val === "string" && (val.includes(",") || val.includes('"'))) {
+            return `"${val.replace(/"/g, '""')}"`;
+          }
+          return val;
+        });
+        csvRows.push(values.join(","));
+      }
+      return csvRows.join("\n");
+    };
+
+    // Manejar exportación según formato
+    const handleExport = () => {
+      if (!format) {
+        alert("Por favor, seleccioná un formato para exportar.");
+        return;
+      }
+
+      let blob;
+      let filename;
+
+      if (format === "json") {
+        blob = new Blob([JSON.stringify(filteredProducts, null, 2)], {
+          type: "application/json",
+        });
+        filename = "productos.json";
+      } else if (format === "csv") {
+        const csvContent = convertToCsv(filteredProducts);
+        blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        filename = "productos.csv";
+      } else if (format === "excel") {
+        const csvContent = convertToCsv(filteredProducts);
+        blob = new Blob([csvContent], {
+          type: "application/vnd.ms-excel;charset=utf-8;",
+        });
+        filename = "productos.xls";
+      } else {
+        alert("Formato no válido.");
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      triggerDownload(url, filename);
+    };
+
+    // Función que inicia la descarga
+    const triggerDownload = (url, filename) => {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    };
+
     return (
         <div ref={containerRef}
         >
@@ -99,6 +176,21 @@ function App() {
                 Modo {darkMode ? "Claro" : "Oscuro"}
               </button>
             
+              <br />
+              <small>Descarga de archivo</small>
+              <select
+                onChange={(e) => setFormat(e.target.value)}
+                value={format}
+                className="border p-2 rounded"
+              >
+                <option value="">Seleccionar formato</option>
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+                <option value="excel">Excel (.xls)</option>
+              </select>
+
+              <button onClick={handleExport}>Exportar archivo</button> 
+
             </div> 
             
             <SearchBar search={search} setSearch={setSearch} /> 
