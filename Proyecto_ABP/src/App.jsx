@@ -286,7 +286,7 @@ function App() {
                 Página anterior
             </button>
             <button
-                disabled={(page * limit) >= totalProductsApi}
+                disabled={filteredProducts.length < limit || (page * limit) >= totalProductsApi}
                 onClick={() => {
                     setPage(page + 1);
                 }}
