@@ -8,3 +8,7 @@
     background-color: black;
     color: azure;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
