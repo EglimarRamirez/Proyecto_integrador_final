@@ -5,6 +5,10 @@ import SearchBar from "./components/SearchBar";
 import ProductList from "./components/ProductList";
 
 function App() {
+    // =========================================================================
+    //          CONFIGURACIÓN INICIAL Y ESTADO DE LA APLICACIÓN
+    // =========================================================================
+
     const [products, setProducts] = useState([]);
     const [search, setSearch] = useState("");
     const [showStats, setShowStats] = useState(true);
@@ -15,12 +19,19 @@ function App() {
     const [sortOrder, setSortOrder] = useState("asc");
     const [page, setPage] = useState(1);
     const [totalProductsApi, setTotalProductsApi] = useState(0);
-    const [format, setFormat] = useState("");    
-    
+    const [format, setFormat] = useState(""); 
+
+    // Referencia para el elemento raíz (para manipulación directa del DOM, ej. modo oscuro)
     const containerRef = useRef(null);
 
+    //Constantes de configuración
     const limit = 30;
 
+    // =========================================================================
+    //                EFECTOS SECUNDARIOS Y CARGA DE DATOS
+    // =========================================================================
+
+    // Cargar productos y categorías de la API cuando cambia la página
     useEffect(() => {
         axios.get(`https://dummyjson.com/products?limit=${limit}&skip=${(page - 1) * limit}`).then((res) => {
             setProducts(res.data.products);
@@ -32,40 +43,57 @@ function App() {
         });        
     }, [page]);
 
+    // =========================================================================
+    //            LÓGICA DE FILTRADO Y ORDENAMIENTO DE PRODUCTOS
+    // =========================================================================
+
     let filteredProducts = products;
 
+    // Aplicar filtro por búsqueda (si hay un término de búsqueda)
     filteredProducts = products.filter((p) =>
             p.title.toLowerCase().includes(search.toLowerCase())
         );
 
+    // Aplicar filtro por categoría (si se ha seleccionado una categoría específica)    
     if (category !== "all") {
       filteredProducts = filteredProducts.filter(
         (p) => p.category === category
       );
     }
-    
+
+    // Aplicar ordenamiento por precio o rating (si se ha seleccionado un criterio)
     if (sortBy === "price" || sortBy === "rating") {
       filteredProducts = [...filteredProducts].sort((a, b) =>
         sortOrder === "asc" ? a[sortBy] - b[sortBy] : b[sortBy] - a[sortBy]
       );
     }
 
+    // =========================================================================
+    //                  CÁLCULOS DE ESTADÍSTICAS DE PRODUCTOS
+    // =========================================================================
+
+    // Estadísticas generales de los productos filtrados
     const total = filteredProducts.length;
     const max = filteredProducts.length > 0 ? Math.max(...filteredProducts.map(p => p.price)) : 0;
     const min = filteredProducts.length > 0 ? Math.min(...filteredProducts.map(p => p.price)) : 0;
     const averagePrice = filteredProducts.length > 0 ? (filteredProducts.reduce((sum, p) => sum + p.price, 0) / filteredProducts.length).toFixed(2) : 0;
 
+    // Conteo de productos por categoría
     const productsByCategory = filteredProducts.reduce((acc, product) => {
         acc[product.category] = (acc[product.category] || 0) + 1;
         return acc;
     }, {});
 
+    // Productos con stock superior a 50
     const stockOver50 = filteredProducts.filter(p => p.stock > 50).length;
 
+    // Productos con rating superior a 4.5
     const ratingOver4_5 = filteredProducts.filter(p => p.rating > 4.5).length;
 
+    // Rating promedio de productos
     const averageRating = filteredProducts.length > 0 ? (filteredProducts.reduce((sum, p) => sum + p.rating, 0) / filteredProducts.length).toFixed(2) : 0;
 
+    // Estadísticas detalladas por categoría
     const categoryStats = {};
     Object.keys(productsByCategory).forEach(cat => {
         const productsInCat = filteredProducts.filter(p => p.category === cat);
@@ -82,6 +110,11 @@ function App() {
         };
     });
 
+    // =========================================================================
+    //              FUNCIONES DE MANEJO DE EVENTOS Y UTILIDADES
+    // =========================================================================
+
+     // Alternar el modo oscuro de la aplicación
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
         containerRef.current.classList.toggle("dark-mode");
@@ -163,19 +196,26 @@ function App() {
       URL.revokeObjectURL(url);
     };
 
+    // =========================================================================
+    //                  RENDERIZADO DE LA INTERFAZ DE USUARIO   
+    // =========================================================================
+
+
     return (
         <div ref={containerRef}
         >
             <div className="flex justify-between items-center mb-6">         
               <h1 className="text-2xl font-bold">Lista de Productos</h1>
-            
+
+              {/* Botón para alternar el Modo Oscuro */}            
               <button
                 onClick={toggleDarkMode}
                 className="px-4 py-2 rounded bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-200 dark:text-black"
               >
                 Modo {darkMode ? "Claro" : "Oscuro"}
               </button>
-            
+
+              {/* Controles de Exportación de Archivos */}
               <br />
               <small>Descarga de archivo</small>
               <select
@@ -193,6 +233,7 @@ function App() {
 
             </div> 
             
+            {/* Barra de Búsqueda */}
             <SearchBar search={search} setSearch={setSearch} /> 
 
             {/* Controles de filtro y orden */}
@@ -230,9 +271,10 @@ function App() {
               </select>
             </div>
          
-            
+            {/* Lista de Productos Renderizada */}
             <ProductList products={filteredProducts} />
-
+            
+            {/* Controles de Paginación */}
             <small>Página {page}</small>
             <br />
             <button
@@ -251,16 +293,18 @@ function App() {
             >
                 Página siguiente
             </button> 
-
+            
+            {/* Sección de Estadísticas */}
             <div className="mt-6">
-
+            
+            {/* Botón para mostrar/ocultar estadísticas */}
             <button onClick={() => setShowStats(!showStats)}
                     className="mb-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500"
             >
                 {showStats ? "Ocultar" : "Mostrar"} estadísticas
             </button>
 
-
+            {/* Panel de Estadísticas */}
             {showStats && filteredProducts.length > 0 && (
                 <StatsPanel 
                 total={total}
@@ -275,7 +319,8 @@ function App() {
                     filteredProducts={filteredProducts}
                 />
             )}
-
+            
+            {/* Mensaje si no se encontraron productos */}
             {filteredProducts.length === 0 && (
               <p className="text-center text-red-500 font-semibold">
                 No se encontraron productos
